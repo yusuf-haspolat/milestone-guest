@@ -6,7 +6,9 @@
   One self-contained file: reads the guest token from ?t=, fetches the
   timeline JSON from the Supabase `guest` Edge Function, renders it.
   All user data goes through textContent / DOM APIs — never innerHTML —
-  so nothing in a child name or caption can execute here.
+  so nothing in a child name, caption or comment can execute here.
+  Read-only by design: guests are anonymous, so comments are shown but
+  there is no way to write one.
 -->
 <html lang="en">
 <head>
@@ -25,12 +27,31 @@
   main { max-width: 680px; margin: 0 auto; padding: 24px 16px 48px; }
   h1 { font-size: 1.6rem; padding-bottom: 4px; }
   .sub { color: #9FB0C0; padding-bottom: 24px; }
-  figure {
+  figure, .card {
     background: #122233; border: 1px solid #1E3348; border-radius: 14px;
     overflow: hidden; margin-bottom: 20px;
   }
   figure img { width: 100%; display: block; min-height: 120px; }
   figcaption { padding: 10px 14px; color: #9FB0C0; font-size: 0.95rem; }
+  /* Milestone cards wear the accent border — they are the highlights. */
+  .card.milestone { border-color: #4ADE80; border-width: 2px; }
+  .card-body { padding: 14px; }
+  .m-head { display: flex; align-items: center; gap: 10px; }
+  .m-badge { font-size: 1.8rem; line-height: 1; }
+  .m-title { font-weight: 600; }
+  .m-meta, .c-date { color: #9FB0C0; font-size: 0.9rem; }
+  .m-note { padding-top: 8px; }
+  /* Many photos per milestone: a grid of thumbs, each opening full size. */
+  .grid {
+    display: grid; gap: 8px; padding: 0 14px 14px;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  }
+  .grid.single { grid-template-columns: 1fr; padding: 0; }
+  .grid img { width: 100%; height: 120px; object-fit: cover; border-radius: 10px; display: block; }
+  .grid.single img { height: auto; border-radius: 0; }
+  .comments { border-top: 1px solid #1E3348; padding: 12px 14px; display: grid; gap: 10px; }
+  .comment .c-author { font-weight: 600; font-size: 0.95rem; }
+  .comment .c-body { font-size: 0.95rem; }
   .center { text-align: center; padding: 30vh 16px 0; }
   .center h1 { font-size: 1.4rem; padding-bottom: 8px; }
   .empty { color: #9FB0C0; text-align: center; padding: 48px 0; }
@@ -51,6 +72,15 @@
 <script>
   const API = 'https://ecrtipbhdfhiqftvctem.supabase.co/functions/v1/guest';
 
+  // Mirrors app/src/constants/milestone-templates.ts; unknown keys and
+  // custom milestones fall back to the generic badge.
+  const BADGES = {
+    first_smile: '😊', first_tooth: '🦷', first_words: '💬', first_crawl: '🍼',
+    first_step: '👣', first_haircut: '✂️', first_birthday: '🎂',
+    first_day_of_school: '🎒',
+  };
+  const badgeFor = (key) => BADGES[key] || '🏅';
+
   /** "3 days old", "6 months, 12 days old", "2 years, 1 month old". */
   function formatAgeDays(ageDays) {
     if (ageDays === null || ageDays === undefined || ageDays < 0) return '';
@@ -69,7 +99,7 @@
   function el(tag, attrs, ...children) {
     const node = document.createElement(tag);
     for (const [k, v] of Object.entries(attrs || {})) node.setAttribute(k, v);
-    for (const c of children) node.append(c);
+    for (const c of children) if (c !== null && c !== undefined && c !== false) node.append(c);
     return node;
   }
 
@@ -81,6 +111,57 @@
         el('p', { class: 'sub' },
           'It may have expired or been turned off. Ask the family to send you a fresh one.'))
     );
+  }
+
+  /** Thumbnails that open the full-size photo in a new tab. */
+  function photoGrid(photos) {
+    const grid = el('div', { class: photos.length === 1 ? 'grid single' : 'grid' });
+    for (const photo of photos) {
+      grid.append(
+        el('a', { href: photo.url, target: '_blank', rel: 'noopener' },
+          el('img', { src: photo.thumbUrl, alt: '', loading: 'lazy' }))
+      );
+    }
+    return grid;
+  }
+
+  /** Read-only thread under a photo or a milestone. */
+  function commentList(comments) {
+    if (!comments || comments.length === 0) return null;
+    const box = el('div', { class: 'comments' });
+    for (const c of comments) {
+      box.append(
+        el('div', { class: 'comment' },
+          el('div', { class: 'c-author' }, c.author),
+          el('div', { class: 'c-body' }, c.body),
+          el('div', { class: 'c-date' }, (c.createdAt || '').slice(0, 10)))
+      );
+    }
+    return box;
+  }
+
+  function milestoneCard(item) {
+    const meta = [formatAgeDays(item.ageDays), item.occurredAt].filter(Boolean).join(' · ');
+    return el('article', { class: 'card milestone' },
+      el('div', { class: 'card-body' },
+        el('div', { class: 'm-head' },
+          el('div', { class: 'm-badge' }, badgeFor(item.templateKey)),
+          el('div', {},
+            el('div', { class: 'm-title' }, item.title),
+            el('div', { class: 'm-meta' }, meta))),
+        item.note ? el('p', { class: 'm-note' }, item.note) : null),
+      item.photos.length > 0 ? photoGrid(item.photos) : null,
+      commentList(item.comments));
+  }
+
+  function photoCard(photo) {
+    const caption = [formatAgeDays(photo.ageDays), (photo.takenAt || '').slice(0, 10)]
+      .filter(Boolean).join(' · ');
+    return el('figure', {},
+      el('a', { href: photo.url, target: '_blank', rel: 'noopener' },
+        el('img', { src: photo.thumbUrl, alt: '', loading: 'lazy' })),
+      el('figcaption', {}, caption),
+      commentList(photo.comments));
   }
 
   async function load() {
@@ -104,18 +185,14 @@
         data.child.name + "'s growth story, moment by moment. Tap a photo to see it full size."),
     ];
 
-    if (data.photos.length === 0) {
+    // `items` is the current shape; `photos` keeps an older cached copy of
+    // this page working if it ever loads against the new function.
+    const items = data.items || (data.photos || []).map((p) => ({ kind: 'photo', ...p }));
+    if (items.length === 0) {
       nodes.push(el('p', { class: 'empty' }, 'No photos yet — check back soon!'));
     }
-    for (const photo of data.photos) {
-      const caption = [formatAgeDays(photo.ageDays), (photo.takenAt || '').slice(0, 10)]
-        .filter(Boolean).join(' · ');
-      nodes.push(
-        el('figure', {},
-          el('a', { href: photo.url },
-            el('img', { src: photo.thumbUrl, alt: '', loading: 'lazy' })),
-          el('figcaption', {}, caption))
-      );
+    for (const item of items) {
+      nodes.push(item.kind === 'milestone' ? milestoneCard(item) : photoCard(item));
     }
 
     nodes.push(el('footer', {}, 'Shared privately with you via Milestone.'));
