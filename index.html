@@ -204,7 +204,7 @@
     // this page working if it ever loads against the new function.
     const items = data.items || (data.photos || []).map((p) => ({ kind: 'photo', ...p }));
     if (items.length === 0) {
-      nodes.push(el('p', { class: 'empty' }, 'No photos yet — check back soon!'));
+      nodes.push(el('p', { class: 'empty' }, 'Nothing here yet — check back soon!'));
     }
     for (const item of items) {
       nodes.push(item.kind === 'milestone' ? milestoneCard(item) : photoCard(item));
