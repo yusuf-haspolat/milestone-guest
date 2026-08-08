@@ -31,7 +31,9 @@
     background: #122233; border: 1px solid #1E3348; border-radius: 14px;
     overflow: hidden; margin-bottom: 20px;
   }
-  figure img { width: 100%; display: block; min-height: 120px; }
+  figure img, figure video { width: 100%; display: block; min-height: 120px; }
+  /* Videos are never cropped: a face cut in half is worse than a letterbox. */
+  figure video { background: #000; }
   figcaption { padding: 10px 14px; color: #9FB0C0; font-size: 0.95rem; }
   /* Milestone cards wear the accent border — they are the highlights. */
   .card.milestone { border-color: #4ADE80; border-width: 2px; }
@@ -47,8 +49,9 @@
     grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
   }
   .grid.single { grid-template-columns: 1fr; padding: 0; }
-  .grid img { width: 100%; height: 120px; object-fit: cover; border-radius: 10px; display: block; }
-  .grid.single img { height: auto; border-radius: 0; }
+  .grid img, .grid video { width: 100%; height: 120px; object-fit: cover; border-radius: 10px; display: block; }
+  .grid video { object-fit: contain; background: #000; }
+  .grid.single img, .grid.single video { height: auto; border-radius: 0; }
   .comments { border-top: 1px solid #1E3348; padding: 12px 14px; display: grid; gap: 10px; }
   .comment .c-author { font-weight: 600; font-size: 0.95rem; }
   .comment .c-body { font-size: 0.95rem; }
@@ -113,15 +116,28 @@
     );
   }
 
+  /**
+   * A video plays right here, in the page — grandparents shouldn't have to
+   * work out that a still with a triangle on it is a different kind of
+   * link. `preload="none"` keeps the poster cheap on a phone connection;
+   * the bytes only move when they press play. There is no transcoding, so
+   * `url` is the file the phone recorded (H.264/AAC MP4 or MOV).
+   */
+  function mediaNode(item) {
+    if (item.mediaKind === 'video') {
+      return el('video', {
+        src: item.url, poster: item.thumbUrl, controls: '',
+        preload: 'none', playsinline: '',
+      });
+    }
+    return el('a', { href: item.url, target: '_blank', rel: 'noopener' },
+      el('img', { src: item.thumbUrl, alt: '', loading: 'lazy' }));
+  }
+
   /** Thumbnails that open the full-size photo in a new tab. */
   function photoGrid(photos) {
     const grid = el('div', { class: photos.length === 1 ? 'grid single' : 'grid' });
-    for (const photo of photos) {
-      grid.append(
-        el('a', { href: photo.url, target: '_blank', rel: 'noopener' },
-          el('img', { src: photo.thumbUrl, alt: '', loading: 'lazy' }))
-      );
-    }
+    for (const photo of photos) grid.append(mediaNode(photo));
     return grid;
   }
 
@@ -158,8 +174,7 @@
     const caption = [formatAgeDays(photo.ageDays), (photo.takenAt || '').slice(0, 10)]
       .filter(Boolean).join(' · ');
     return el('figure', {},
-      el('a', { href: photo.url, target: '_blank', rel: 'noopener' },
-        el('img', { src: photo.thumbUrl, alt: '', loading: 'lazy' })),
+      mediaNode(photo),
       el('figcaption', {}, caption),
       commentList(photo.comments));
   }
@@ -182,7 +197,7 @@
     const nodes = [
       el('h1', {}, data.child.name + "'s timeline"),
       el('p', { class: 'sub' },
-        data.child.name + "'s growth story, moment by moment. Tap a photo to see it full size."),
+        data.child.name + "'s growth story, moment by moment. Tap a photo to see it full size, or press play on a video."),
     ];
 
     // `items` is the current shape; `photos` keeps an older cached copy of
