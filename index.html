@@ -84,18 +84,81 @@
   };
   const badgeFor = (key) => BADGES[key] || '🏅';
 
+  /**
+   * Language follows the BROWSER, not the app.
+   *
+   * The person reading this page is not the person who set the language in
+   * Milestone — that is the whole point of a guest link. Their own browser
+   * is the only thing here that knows what they read, so it decides. There
+   * is deliberately nothing to configure and nothing stored: a grandmother
+   * opening a link on a Turkish phone gets Turkish without being asked.
+   */
+  const LANG = (navigator.language || 'en').toLowerCase().startsWith('tr') ? 'tr' : 'en';
+
+  const STRINGS = {
+    en: {
+      title: (name) => name + "'s timeline",
+      sub: (name) =>
+        name + "'s growth story, moment by moment. Tap a photo to see it full size, or press play on a video.",
+      empty: 'Nothing here yet — check back soon!',
+      footer: 'Shared privately with you via Milestone.',
+      errorTitle: "This link isn't available",
+      errorBody: 'It may have expired or been turned off. Ask the family to send you a fresh one.',
+      months: ['January','February','March','April','May','June','July','August','September','October','November','December'],
+      age: {
+        day: (n) => (n === 1 ? '1 day old' : n + ' days old'),
+        months: (m) => m + ' months old',
+        monthsDays: (m, d) => m + ' months, ' + d + ' days old',
+        years: (y) => y + ' years old',
+        yearsMonths: (y, m) => y + ' years, ' + m + ' months old',
+      },
+    },
+    tr: {
+      title: (name) => name + ' — zaman tüneli',
+      sub: (name) =>
+        name + ' adlı çocuğun büyüme hikâyesi, an be an. Fotoğrafa dokunup tam boy görebilir, videoda oynata basabilirsin.',
+      empty: 'Burada henüz bir şey yok — yakında tekrar bak!',
+      footer: 'Milestone üzerinden sana özel olarak paylaşıldı.',
+      errorTitle: 'Bu bağlantı kullanılamıyor',
+      errorBody: 'Süresi dolmuş ya da kapatılmış olabilir. Aileden yeni bir tane istemen yeterli.',
+      months: ['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'],
+      age: {
+        day: (n) => n + ' günlük',
+        months: (m) => m + ' aylık',
+        monthsDays: (m, d) => m + ' ay ' + d + ' günlük',
+        years: (y) => y + ' yaşında',
+        yearsMonths: (y, m) => y + ' yaş ' + m + ' aylık',
+      },
+    },
+  };
+  const S = STRINGS[LANG];
+
   /** "3 days old", "6 months, 12 days old", "2 years, 1 month old". */
   function formatAgeDays(ageDays) {
     if (ageDays === null || ageDays === undefined || ageDays < 0) return '';
-    if (ageDays < 60) return ageDays === 1 ? '1 day old' : ageDays + ' days old';
+    if (ageDays < 60) return S.age.day(ageDays);
     const months = Math.floor(ageDays / 30.44);
     if (months < 24) {
       const days = Math.round(ageDays - months * 30.44);
-      return days > 0 ? months + ' months, ' + days + ' days old' : months + ' months old';
+      return days > 0 ? S.age.monthsDays(months, days) : S.age.months(months);
     }
     const years = Math.floor(ageDays / 365.25);
     const rem = Math.floor((ageDays - years * 365.25) / 30.44);
-    return rem > 0 ? years + ' years, ' + rem + ' months old' : years + ' years old';
+    return rem > 0 ? S.age.yearsMonths(years, rem) : S.age.years(years);
+  }
+
+  /**
+   * `YYYY-MM-DD` → "14 March 2025", read straight off the string. Not
+   * `toLocaleDateString`, for the same reason the app avoids it: parsing a
+   * bare date through `Date` reports UTC midnight in local time, which shows
+   * the previous day for anyone west of Greenwich.
+   */
+  function formatDate(iso) {
+    const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(iso || '');
+    if (!m) return iso || '';
+    const month = Number(m[2]);
+    if (month < 1 || month > 12) return iso;
+    return Number(m[3]) + ' ' + S.months[month - 1] + ' ' + m[1];
   }
 
   // el('p', {class: 'sub'}, 'text') — tiny DOM builder; text stays text.
@@ -110,9 +173,8 @@
     const app = document.getElementById('app');
     app.replaceChildren(
       el('div', { class: 'center' },
-        el('h1', {}, "This link isn't available"),
-        el('p', { class: 'sub' },
-          'It may have expired or been turned off. Ask the family to send you a fresh one.'))
+        el('h1', {}, S.errorTitle),
+        el('p', { class: 'sub' }, S.errorBody))
     );
   }
 
@@ -150,14 +212,15 @@
         el('div', { class: 'comment' },
           el('div', { class: 'c-author' }, c.author),
           el('div', { class: 'c-body' }, c.body),
-          el('div', { class: 'c-date' }, (c.createdAt || '').slice(0, 10)))
+          el('div', { class: 'c-date' }, formatDate((c.createdAt || '').slice(0, 10))))
       );
     }
     return box;
   }
 
   function milestoneCard(item) {
-    const meta = [formatAgeDays(item.ageDays), item.occurredAt].filter(Boolean).join(' · ');
+    const meta = [formatAgeDays(item.ageDays), formatDate(item.occurredAt)]
+      .filter(Boolean).join(' · ');
     return el('article', { class: 'card milestone' },
       el('div', { class: 'card-body' },
         el('div', { class: 'm-head' },
@@ -171,7 +234,7 @@
   }
 
   function photoCard(photo) {
-    const caption = [formatAgeDays(photo.ageDays), (photo.takenAt || '').slice(0, 10)]
+    const caption = [formatAgeDays(photo.ageDays), formatDate((photo.takenAt || '').slice(0, 10))]
       .filter(Boolean).join(' · ');
     return el('figure', {},
       mediaNode(photo),
@@ -192,25 +255,25 @@
       return showError();
     }
 
-    document.title = data.child.name + "'s timeline";
+    document.documentElement.lang = LANG;
+    document.title = S.title(data.child.name);
     const app = document.getElementById('app');
     const nodes = [
-      el('h1', {}, data.child.name + "'s timeline"),
-      el('p', { class: 'sub' },
-        data.child.name + "'s growth story, moment by moment. Tap a photo to see it full size, or press play on a video."),
+      el('h1', {}, S.title(data.child.name)),
+      el('p', { class: 'sub' }, S.sub(data.child.name)),
     ];
 
     // `items` is the current shape; `photos` keeps an older cached copy of
     // this page working if it ever loads against the new function.
     const items = data.items || (data.photos || []).map((p) => ({ kind: 'photo', ...p }));
     if (items.length === 0) {
-      nodes.push(el('p', { class: 'empty' }, 'Nothing here yet — check back soon!'));
+      nodes.push(el('p', { class: 'empty' }, S.empty));
     }
     for (const item of items) {
       nodes.push(item.kind === 'milestone' ? milestoneCard(item) : photoCard(item));
     }
 
-    nodes.push(el('footer', {}, 'Shared privately with you via Milestone.'));
+    nodes.push(el('footer', {}, S.footer));
     app.replaceChildren(...nodes);
   }
 
