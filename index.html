@@ -93,7 +93,7 @@
    * is deliberately nothing to configure and nothing stored: a grandmother
    * opening a link on a Turkish phone gets Turkish without being asked.
    */
-  const LANG = (navigator.language || 'en').toLowerCase().startsWith('tr') ? 'tr' : 'en';
+  const LANG_TAG = (navigator.language || 'en').toLowerCase().split(/[-_]/)[0];
 
   const STRINGS = {
     en: {
@@ -105,12 +105,15 @@
       errorTitle: "This link isn't available",
       errorBody: 'It may have expired or been turned off. Ask the family to send you a fresh one.',
       months: ['January','February','March','April','May','June','July','August','September','October','November','December'],
+      date: (d, month, y) => d + ' ' + month + ' ' + y,
       age: {
         day: (n) => (n === 1 ? '1 day old' : n + ' days old'),
-        months: (m) => m + ' months old',
-        monthsDays: (m, d) => m + ' months, ' + d + ' days old',
-        years: (y) => y + ' years old',
-        yearsMonths: (y, m) => y + ' years, ' + m + ' months old',
+        months: (m) => (m === 1 ? '1 month old' : m + ' months old'),
+        monthsDays: (m, d) =>
+          (m === 1 ? '1 month' : m + ' months') + ', ' + (d === 1 ? '1 day' : d + ' days') + ' old',
+        years: (y) => (y === 1 ? '1 year old' : y + ' years old'),
+        yearsMonths: (y, m) =>
+          (y === 1 ? '1 year' : y + ' years') + ', ' + (m === 1 ? '1 month' : m + ' months') + ' old',
       },
     },
     tr: {
@@ -122,6 +125,7 @@
       errorTitle: 'Bu bağlantı kullanılamıyor',
       errorBody: 'Süresi dolmuş ya da kapatılmış olabilir. Aileden yeni bir tane istemen yeterli.',
       months: ['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'],
+      date: (d, month, y) => d + ' ' + month + ' ' + y,
       age: {
         day: (n) => n + ' günlük',
         months: (m) => m + ' aylık',
@@ -130,7 +134,113 @@
         yearsMonths: (y, m) => y + ' yaş ' + m + ' aylık',
       },
     },
+    de: {
+      title: (name) => 'Die Chronik von ' + name,
+      sub: (name) =>
+        'Wie ' + name + ' wächst, Moment für Moment. Tippe ein Foto an, um es groß zu sehen, oder starte ein Video.',
+      empty: 'Hier ist noch nichts — schau bald wieder vorbei!',
+      footer: 'Privat mit dir geteilt über Milestone.',
+      errorTitle: 'Dieser Link ist nicht verfügbar',
+      errorBody: 'Er ist vielleicht abgelaufen oder wurde abgeschaltet. Bitte die Familie um einen neuen.',
+      months: ['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'],
+      date: (d, month, y) => d + '. ' + month + ' ' + y,
+      age: {
+        day: (n) => (n === 1 ? '1 Tag alt' : n + ' Tage alt'),
+        months: (m) => (m === 1 ? '1 Monat alt' : m + ' Monate alt'),
+        monthsDays: (m, d) =>
+          (m === 1 ? '1 Monat' : m + ' Monate') + ', ' + (d === 1 ? '1 Tag' : d + ' Tage') + ' alt',
+        years: (y) => (y === 1 ? '1 Jahr alt' : y + ' Jahre alt'),
+        yearsMonths: (y, m) =>
+          (y === 1 ? '1 Jahr' : y + ' Jahre') + ', ' + (m === 1 ? '1 Monat' : m + ' Monate') + ' alt',
+      },
+    },
+    es: {
+      title: (name) => 'La línea de tiempo de ' + name,
+      sub: (name) =>
+        'La historia de cómo crece ' + name + ', momento a momento. Toca una foto para verla en grande, o dale al play en un vídeo.',
+      empty: 'Todavía no hay nada aquí. ¡Vuelve pronto!',
+      footer: 'Compartido contigo en privado a través de Milestone.',
+      errorTitle: 'Este enlace no está disponible',
+      errorBody: 'Puede que haya caducado o se haya desactivado. Pide a la familia que te envíe otro.',
+      months: ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'],
+      date: (d, month, y) => d + ' de ' + month + ' de ' + y,
+      age: {
+        day: (n) => (n === 1 ? '1 día' : n + ' días'),
+        months: (m) => (m === 1 ? '1 mes' : m + ' meses'),
+        monthsDays: (m, d) =>
+          (m === 1 ? '1 mes' : m + ' meses') + ' y ' + (d === 1 ? '1 día' : d + ' días'),
+        years: (y) => (y === 1 ? '1 año' : y + ' años'),
+        yearsMonths: (y, m) =>
+          (y === 1 ? '1 año' : y + ' años') + ' y ' + (m === 1 ? '1 mes' : m + ' meses'),
+      },
+    },
+    fr: {
+      title: (name) => 'Le journal de ' + name,
+      sub: (name) =>
+        'L’histoire de ' + name + ' qui grandit, moment après moment. Touche une photo pour la voir en grand, ou lance une vidéo.',
+      empty: 'Rien ici pour l’instant — reviens bientôt !',
+      footer: 'Partagé avec toi en privé via Milestone.',
+      errorTitle: 'Ce lien n’est pas disponible',
+      errorBody: 'Il a peut-être expiré ou été désactivé. Demande à la famille de t’en envoyer un nouveau.',
+      months: ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'],
+      date: (d, month, y) => d + ' ' + month + ' ' + y,
+      age: {
+        day: (n) => (n === 1 ? '1 jour' : n + ' jours'),
+        months: (m) => m + ' mois',
+        monthsDays: (m, d) =>
+          m + ' mois et ' + (d === 1 ? '1 jour' : d + ' jours'),
+        years: (y) => (y === 1 ? '1 an' : y + ' ans'),
+        yearsMonths: (y, m) => (y === 1 ? '1 an' : y + ' ans') + ' et ' + m + ' mois',
+      },
+    },
+    pt: {
+      title: (name) => 'A linha do tempo de ' + name,
+      sub: (name) =>
+        'A história de ' + name + ' crescendo, momento a momento. Toque em uma foto para ver em tamanho grande, ou dê play em um vídeo.',
+      empty: 'Ainda não há nada aqui — volte em breve!',
+      footer: 'Compartilhado com você em particular pelo Milestone.',
+      errorTitle: 'Este link não está disponível',
+      errorBody: 'Ele pode ter expirado ou sido desativado. Peça um novo para a família.',
+      months: ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'],
+      date: (d, month, y) => d + ' de ' + month + ' de ' + y,
+      age: {
+        day: (n) => (n === 1 ? '1 dia' : n + ' dias'),
+        months: (m) => (m === 1 ? '1 mês' : m + ' meses'),
+        monthsDays: (m, d) =>
+          (m === 1 ? '1 mês' : m + ' meses') + ' e ' + (d === 1 ? '1 dia' : d + ' dias'),
+        years: (y) => (y === 1 ? '1 ano' : y + ' anos'),
+        yearsMonths: (y, m) =>
+          (y === 1 ? '1 ano' : y + ' anos') + ' e ' + (m === 1 ? '1 mês' : m + ' meses'),
+      },
+    },
+    it: {
+      title: (name) => 'Il diario di ' + name,
+      sub: (name) =>
+        'La storia di ' + name + ' che cresce, momento per momento. Tocca una foto per vederla grande, o avvia un video.',
+      empty: 'Qui non c’è ancora niente — torna presto!',
+      footer: 'Condiviso con te in privato tramite Milestone.',
+      errorTitle: 'Questo link non è disponibile',
+      errorBody: 'Potrebbe essere scaduto o essere stato disattivato. Chiedi alla famiglia di mandartene uno nuovo.',
+      months: ['gennaio','febbraio','marzo','aprile','maggio','giugno','luglio','agosto','settembre','ottobre','novembre','dicembre'],
+      date: (d, month, y) => d + ' ' + month + ' ' + y,
+      age: {
+        day: (n) => (n === 1 ? '1 giorno' : n + ' giorni'),
+        months: (m) => (m === 1 ? '1 mese' : m + ' mesi'),
+        monthsDays: (m, d) =>
+          (m === 1 ? '1 mese' : m + ' mesi') + ' e ' + (d === 1 ? '1 giorno' : d + ' giorni'),
+        years: (y) => (y === 1 ? '1 anno' : y + ' anni'),
+        yearsMonths: (y, m) =>
+          (y === 1 ? '1 anno' : y + ' anni') + ' e ' + (m === 1 ? '1 mese' : m + ' mesi'),
+      },
+    },
   };
+
+  /**
+   * The browser's language if this page speaks it, English otherwise. The
+   * primary subtag is all that is read, so `pt-BR`, `pt-PT` and bare `pt` all
+   * land on the one Portuguese table.
+   */
+  const LANG = Object.prototype.hasOwnProperty.call(STRINGS, LANG_TAG) ? LANG_TAG : 'en';
   const S = STRINGS[LANG];
 
   /** "3 days old", "6 months, 12 days old", "2 years, 1 month old". */
@@ -152,13 +262,18 @@
    * `toLocaleDateString`, for the same reason the app avoids it: parsing a
    * bare date through `Date` reports UTC midnight in local time, which shows
    * the previous day for anyone west of Greenwich.
+   *
+   * The order is the language's own (`S.date`), because it is not universal:
+   * German writes "14. März 2025", Spanish and Portuguese "14 de marzo de
+   * 2025". This page had the English order hard-coded until the five new
+   * languages arrived on 2026-08-21.
    */
   function formatDate(iso) {
     const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(iso || '');
     if (!m) return iso || '';
     const month = Number(m[2]);
     if (month < 1 || month > 12) return iso;
-    return Number(m[3]) + ' ' + S.months[month - 1] + ' ' + m[1];
+    return S.date(Number(m[3]), S.months[month - 1], m[1]);
   }
 
   // el('p', {class: 'sub'}, 'text') — tiny DOM builder; text stays text.
