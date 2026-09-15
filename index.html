@@ -1,6 +1,6 @@
 <!doctype html>
 <!--
-  Milestone — grandparent guest view (GitHub Pages: yusuf-haspolat/milestone-guest).
+  Gugupic — grandparent guest view (GitHub Pages: yusuf-haspolat/milestone-guest).
   Cloudflare Pages was the first choice but *.pages.dev is DNS+SNI blocked
   in Türkiye (checked 2026-08-01), where the family lives.
   One self-contained file: reads the guest token from ?t=, fetches the
@@ -15,7 +15,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
-<title>Milestone</title>
+<title>Gugupic</title>
 <style>
   :root { color-scheme: dark; }
   * { margin: 0; box-sizing: border-box; }
@@ -73,7 +73,7 @@
 </main>
 
 <script>
-  const API = 'https://ecrtipbhdfhiqftvctem.supabase.co/functions/v1/guest';
+  const API = 'https://puqyeamomjzgamhqchrd.supabase.co/functions/v1/guest';
 
   // Mirrors app/src/constants/milestone-templates.ts; unknown keys and
   // custom milestones fall back to the generic badge.
@@ -88,7 +88,7 @@
    * Language follows the BROWSER, not the app.
    *
    * The person reading this page is not the person who set the language in
-   * Milestone — that is the whole point of a guest link. Their own browser
+   * Gugupic — that is the whole point of a guest link. Their own browser
    * is the only thing here that knows what they read, so it decides. There
    * is deliberately nothing to configure and nothing stored: a grandmother
    * opening a link on a Turkish phone gets Turkish without being asked.
@@ -101,7 +101,7 @@
       sub: (name) =>
         name + "'s growth story, moment by moment. Tap a photo to see it full size, or press play on a video.",
       empty: 'Nothing here yet — check back soon!',
-      footer: 'Shared privately with you via Milestone.',
+      footer: 'Shared privately with you via Gugupic.',
       errorTitle: "This link isn't available",
       errorBody: 'It may have expired or been turned off. Ask the family to send you a fresh one.',
       months: ['January','February','March','April','May','June','July','August','September','October','November','December'],
@@ -121,7 +121,7 @@
       sub: (name) =>
         name + ' adlı çocuğun büyüme hikâyesi, an be an. Fotoğrafa dokunup tam boy görebilir, videoda oynata basabilirsin.',
       empty: 'Burada henüz bir şey yok — yakında tekrar bak!',
-      footer: 'Milestone üzerinden sana özel olarak paylaşıldı.',
+      footer: 'Gugupic üzerinden sana özel olarak paylaşıldı.',
       errorTitle: 'Bu bağlantı kullanılamıyor',
       errorBody: 'Süresi dolmuş ya da kapatılmış olabilir. Aileden yeni bir tane istemen yeterli.',
       months: ['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'],
@@ -139,7 +139,7 @@
       sub: (name) =>
         'Wie ' + name + ' wächst, Moment für Moment. Tippe ein Foto an, um es groß zu sehen, oder starte ein Video.',
       empty: 'Hier ist noch nichts — schau bald wieder vorbei!',
-      footer: 'Privat mit dir geteilt über Milestone.',
+      footer: 'Privat mit dir geteilt über Gugupic.',
       errorTitle: 'Dieser Link ist nicht verfügbar',
       errorBody: 'Er ist vielleicht abgelaufen oder wurde abgeschaltet. Bitte die Familie um einen neuen.',
       months: ['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'],
@@ -159,7 +159,7 @@
       sub: (name) =>
         'La historia de cómo crece ' + name + ', momento a momento. Toca una foto para verla en grande, o dale al play en un vídeo.',
       empty: 'Todavía no hay nada aquí. ¡Vuelve pronto!',
-      footer: 'Compartido contigo en privado a través de Milestone.',
+      footer: 'Compartido contigo en privado a través de Gugupic.',
       errorTitle: 'Este enlace no está disponible',
       errorBody: 'Puede que haya caducado o se haya desactivado. Pide a la familia que te envíe otro.',
       months: ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'],
@@ -179,7 +179,7 @@
       sub: (name) =>
         'L’histoire de ' + name + ' qui grandit, moment après moment. Touche une photo pour la voir en grand, ou lance une vidéo.',
       empty: 'Rien ici pour l’instant — reviens bientôt !',
-      footer: 'Partagé avec toi en privé via Milestone.',
+      footer: 'Partagé avec toi en privé via Gugupic.',
       errorTitle: 'Ce lien n’est pas disponible',
       errorBody: 'Il a peut-être expiré ou été désactivé. Demande à la famille de t’en envoyer un nouveau.',
       months: ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'],
@@ -198,7 +198,7 @@
       sub: (name) =>
         'A história de ' + name + ' crescendo, momento a momento. Toque em uma foto para ver em tamanho grande, ou dê play em um vídeo.',
       empty: 'Ainda não há nada aqui — volte em breve!',
-      footer: 'Compartilhado com você em particular pelo Milestone.',
+      footer: 'Compartilhado com você em particular pelo Gugupic.',
       errorTitle: 'Este link não está disponível',
       errorBody: 'Ele pode ter expirado ou sido desativado. Peça um novo para a família.',
       months: ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'],
@@ -218,7 +218,7 @@
       sub: (name) =>
         'La storia di ' + name + ' che cresce, momento per momento. Tocca una foto per vederla grande, o avvia un video.',
       empty: 'Qui non c’è ancora niente — torna presto!',
-      footer: 'Condiviso con te in privato tramite Milestone.',
+      footer: 'Condiviso con te in privato tramite Gugupic.',
       errorTitle: 'Questo link non è disponibile',
       errorBody: 'Potrebbe essere scaduto o essere stato disattivato. Chiedi alla famiglia di mandartene uno nuovo.',
       months: ['gennaio','febbraio','marzo','aprile','maggio','giugno','luglio','agosto','settembre','ottobre','novembre','dicembre'],
